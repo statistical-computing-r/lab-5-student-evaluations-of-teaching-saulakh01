@@ -91,9 +91,11 @@ evals <- read.csv("data-raw/teacher_evals.csv")
 
 **3. Provide a brief overview (~4 sentences) of the dataset.**
 
+> The dataset of instructors records various types of variables about the instructors and their demographics. Gender, seniority, number of degrees, types of degrees are part of their demographic data. The dataset also contains information about their performances as instructors through feedback from their students. THis feedback is in the form of a survery, as well as the statistical information of student performance.
+
 ```{r}
 #| label: explore-data
-# you may want to use code to answer this question
+# exploring our teacher dataset
 summary(evals)
 dim(evals)
 ```
@@ -174,7 +176,7 @@ summary(teacher_evals_clean$seniority)
 
 ```
 
-The gender distribution of instructors in this study is 3278 female instructors and 3539 male instructors. Out of the number of degrees that the instructors hold collectively, 4367 are Doctorate degrees, and 1852 are Masters degrees. Also, we can see that the mean number of calendar years that have passed since the instructors began teaching is 5.466 years.
+>The gender distribution of instructors in this study is 3278 female instructors and 3539 male instructors. Out of the number of degrees that the instructors hold collectively, 4367 are Doctorate degrees, and 1852 are Masters degrees. Also, we can see that the mean number of calendar years that have passed since the instructors began teaching is 5.466 years.
 
 **9. Each course seems to have used a different subset of the nine evaluation questions. How many teacher-course combinations asked all nine questions?**
 
