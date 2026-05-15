@@ -84,7 +84,7 @@ library(dplyr)
 ```{r}
 #| label: load-data
 # code chunk for importing the data
-evals <- read.csv("teacher_evals.csv")
+evals <- read.csv("data-raw/teacher_evals.csv")
 ```
 
 ### Data Inspection + Summary
@@ -122,34 +122,59 @@ Average answer of student in each course for each question.
 ```{r}
 #| label: clean-data
 # pipe and clean data for use
-clean <- evals |>
-  mutate(across(evals))
+teacher_evals_clean <- evals |>
+  rename(sex = gender) |> 
+  filter(no_participants >= 10) |> 
+  mutate(teacher_id = as.character(teacher_id),
+    course_id  = as.character(course_id),
+    academic_degree = as.factor(academic_degree),
+    seniority = as.numeric(seniority),
+    sex = as.factor(sex)) |>
+  
+  select(course_id, teacher_id, question_no, no_participants, resp_share,
+    SET_score_avg, percent_failed_cur, academic_degree, seniority, sex)
+
+write.csv(teacher_evals_clean, "data-clean/teacher_evals_clean.csv", row.names = FALSE)
+
  
 ```
 
 **6. How many unique instructors and unique courses are present in the cleaned dataset?**
 
 ```{r}
-#| label: add-label-q6
-# comment for Q6
-
+#| label: number-of-unique-teachers-and-courses
+# unique instructors and unique courses present in the cleaned dataset
+teacher_evals_clean |>
+  summarise(n_teachers = n_distinct(teacher_id),
+    n_courses  = n_distinct(course_id))
 ```
 
 **7. One teacher-course combination has some missing values, coded as `NA`. Which instructor has these missing values? Which course? What variable are the missing values in?**
 
 ```{r}
-#| label: add-label-7
-# comment for Q7
-
+#| label: teacher-course-combination-is-na
+# teacher id of inscructor with missing values in dataset
+teacher_evals_clean |>
+  filter(if_any(everything(), is.na))
 ```
 
 **8. What are the demographics of the instructors in this study? Investigate the variables `academic_degree`, `seniority`, and `sex` and summarize your findings in ~3 complete sentences.**
 
 ```{r}
-#| label: add-label-q8
-# comment for Q8
+#| label: instructor-demographics
+# demographics of the instructors in this study
+teacher_evals_clean |>
+  summarise(degree_counts = n_distinct(academic_degree),
+    seniority_min = min(seniority, na.rm = TRUE),
+    seniority_max = max(seniority, na.rm = TRUE))
+
+table(teacher_evals_clean$academic_degree)
+table(teacher_evals_clean$sex)
+summary(teacher_evals_clean$seniority)
 
 ```
+
+The gender distribution of instructors in this study is 3278 female instructors and 3539 male instructors.
 
 **9. Each course seems to have used a different subset of the nine evaluation questions. How many teacher-course combinations asked all nine questions?**
 
