@@ -174,13 +174,19 @@ summary(teacher_evals_clean$seniority)
 
 ```
 
-The gender distribution of instructors in this study is 3278 female instructors and 3539 male instructors.
+The gender distribution of instructors in this study is 3278 female instructors and 3539 male instructors. Out of the number of degrees that the instructors hold collectively, 4367 are Doctorate degrees, and 1852 are Masters degrees. Also, we can see that the mean number of calendar years that have passed since the instructors began teaching is 5.466 years.
 
 **9. Each course seems to have used a different subset of the nine evaluation questions. How many teacher-course combinations asked all nine questions?**
 
 ```{r}
-#| label: add-label-q9
-# comment for Q9
+#| label: teacher-course-comb-nine-questions
+# th number of teacher-course combinations that asked all nine questions
+teacher_evals_clean |>
+  group_by(teacher_id, course_id) |>
+  summarise(n_questions = n_distinct(question_no)) |>
+  filter(n_questions == 9) |>
+  nrow()
+
 
 ```
 
@@ -189,24 +195,40 @@ The gender distribution of instructors in this study is 3278 female instructors 
 **10. Which instructors had the highest and lowest average rating for Question 1 (I learned a lot during the course.) across all their courses?**
 
 ```{r}
-#| label: add-label-q10
-# comment for Q10
+#| label: question1
+# instructors that had the highest and lowest average rating for Question 1 on the survey
+teacher_evals_clean |>
+  filter(question_no == 1) |>
+  group_by(teacher_id) |>
+  summarise(avg_q1 = mean(SET_score_avg, na.rm = TRUE)) |>
+  arrange(avg_q1)
 
 ```
 
 **11. Which instructors with one year of experience had the highest and lowest average percentage of students failing in the current semester across all their courses?**
 
 ```{r}
-#| label: add-label-11
-# comment for 11
+#| label: one-year-experience
+# instructors with one year of experience that had the highest and lowest average percentage of students failing in the current semester across all their courses
+teacher_evals_clean |>
+  filter(seniority == 1) |>
+  group_by(teacher_id) |>
+  summarise(avg_fail = mean(percent_failed_cur, na.rm = TRUE)) |>
+  arrange(avg_fail)
 
 ```
 
 **12. Which female instructors with either a doctorate or professional degree had the highest and lowest average percent of students responding to the evaluation across all their courses?**
 
 ```{r}
-#| label: add-label-12
-# comment for 12
+#| label: female-instructors-student-responses
+# female instructors with either a doctorate or professional degree that had the highest and lowest average percent of students responding to the evaluation across all their courses
+teacher_evals_clean |>
+  filter(sex == "female",
+    academic_degree %in% c("doctorate", "professional")) |>
+  group_by(teacher_id) |>
+  summarise(avg_resp = mean(resp_share, na.rm = TRUE)) |>
+  arrange(avg_resp)
 
 ```
 
