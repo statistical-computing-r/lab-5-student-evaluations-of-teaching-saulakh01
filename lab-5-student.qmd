@@ -77,6 +77,7 @@ included in the `teacher_evals_codebook.pdf`.
 #| label: setup
 # code chunk for loading packages
 library(dplyr)
+library(tidyverse)
 ```
 
 **2. Load in the `teacher_evals` data.** 
@@ -84,7 +85,8 @@ library(dplyr)
 ```{r}
 #| label: load-data
 # code chunk for importing the data
-evals <- read.csv("data-raw/teacher_evals.csv")
+evals <- read_csv("data-raw/teacher_evals.csv")
+show_col_types = FALSE
 ```
 
 ### Data Inspection + Summary
@@ -98,6 +100,7 @@ evals <- read.csv("data-raw/teacher_evals.csv")
 # exploring our teacher dataset
 summary(evals)
 dim(evals)
+
 ```
 The data is the scores that students give to statements on the questionnaire based on how much they agree with the statement. The statements are claims that indicate the housekeeping aspect of class structure, rather than direct material. It is more about how the material is taught over what material is taught. The feedback is also grouped with characteristics of the class instructors, the logistics of the course, and grades students typically received. The grouping of the data can contextualize what kind of scores different instructors of different teaching styles and seniority levels receive.
 
