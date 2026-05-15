@@ -1,0 +1,241 @@
+---
+title: "Lab 5: Student Evaluations of Teaching"
+author: "Samreen"
+format: gfm
+editor: source
+execute: 
+  echo: true
+---
+
+In this lab, we will be using the `dplyr` package to explore student evaluations
+of teaching data. 
+
+**You are expected to use functions from `dplyr` to do your data manipulation!**
+
+## The Data
+
+The `teacher_evals` dataset contains student evaluations of reaching (SET)
+collected from students at a University in Poland. There are SET surveys from 
+students in all fields and all levels of study offered by the university.
+
+The SET questionnaire that every student at this university completes is as
+follows:
+
+> Evaluation survey of the teaching staff of University of Poland. Please
+> complete the following evaluation form, which aims to assess the lecturer’s
+> performance. Only one answer should be indicated for each question. The
+> answers are coded in the following way: 5 - I strongly agree; 4 - I agree;
+> 3 - Neutral; 2 - I don’t agree; 1 - I strongly don’t agree.
+>
+> Question 1: I learned a lot during the course.
+>
+> Question 2: I think that the knowledge acquired during the course is very
+> useful.
+>
+> Question 3: The professor used activities to make the class more engaging.
+>
+> Question 4: If it was possible, I would enroll for a course conducted by this
+> lecturer again.
+>
+> Question 5: The classes started on time.
+>
+> Question 6: The lecturer always used time efficiently.
+>
+> Question 7: The lecturer delivered the class content in an understandable and
+> efficient way.
+>
+> Question 8: The lecturer was available when we had doubts.
+>
+> Question 9. The lecturer treated all students equally regardless of their
+> race, background and ethnicity.
+
+These data are from the end of the winter semester of the 2020-2021 academic
+year. In the period of data collection, all university classes were entirely
+online amid the COVID-19 pandemic. While expected learning outcomes were not
+changed, the online mode of study could have affected grading policies and could
+have implications for data.
+
+**Average SET scores** were combined with many other variables, including:
+
+1.  **characteristics of the teacher** (degree, seniority, gender, SET scores in
+the past 6 semesters).
+2.  **characteristics of the course** (time of day, day of the week, course
+type, course breadth, class duration, class size).
+3.  **percentage of students providing SET feedback.**
+4.  **course grades** (mean, standard deviation, percentage failed for the
+current course and previous 6 semesters).
+
+This rich dataset allows us to **investigate many of the biases in student evaluations of teaching** that have been reported in the literature and to formulate new
+hypotheses.
+
+Before tackling the problems below, study the description of each variable
+included in the `teacher_evals_codebook.pdf`.
+
+**1. Load the appropriate R packages for your analysis.**
+
+```{r}
+#| label: setup
+# code chunk for loading packages
+library(dplyr)
+library(tidyverse)
+```
+
+**2. Load in the `teacher_evals` data.** 
+
+```{r}
+#| label: load-data
+# code chunk for importing the data
+evals <- read_csv("data-raw/teacher_evals.csv")
+show_col_types = FALSE
+```
+
+### Data Inspection + Summary
+
+**3. Provide a brief overview (~4 sentences) of the dataset.**
+
+> The dataset of instructors records various types of variables about the instructors and their demographics. Gender, seniority, number of degrees, types of degrees are part of their demographic data. The dataset also contains information about their performances as instructors through feedback from their students. THis feedback is in the form of a survery, as well as the statistical information of student performance.
+
+```{r}
+#| label: explore-data
+# exploring our teacher dataset
+summary(evals)
+dim(evals)
+
+```
+The data is the scores that students give to statements on the questionnaire based on how much they agree with the statement. The statements are claims that indicate the housekeeping aspect of class structure, rather than direct material. It is more about how the material is taught over what material is taught. The feedback is also grouped with characteristics of the class instructors, the logistics of the course, and grades students typically received. The grouping of the data can contextualize what kind of scores different instructors of different teaching styles and seniority levels receive.
+
+**4. What is the unit of observation (i.e. a single row in the dataset) identified by?**
+
+The single row demonstrates the 
+
+```{r}
+#| label: row-identification
+# you may want to use code to answer this question
+glimpse(evals)
+```
+Average answer of student in each course for each question.
+
+**5. Use _one_ `dplyr` pipeline to clean the data by:**
+
+- **renaming the `gender` variable `sex`**
+- **removing all courses with fewer than 10 respondents**
+- **changing data types in whichever way you see fit (e.g., is the instructor ID really a numeric data type?)**
+- **only keeping the columns we will use -- `course_id`, `teacher_id`, `question_no`, `no_participants`, `resp_share`, `SET_score_avg`, `percent_failed_cur`, `academic_degree`, `seniority`, and `sex`**
+
+**Assign your cleaned data to a new variable named `teacher_evals_clean` –- use these data going forward. Save the data as `teacher_evals_clean.csv` in the `data-clean` folder.**
+
+```{r}
+#| label: clean-data
+# pipe and clean data for use
+teacher_evals_clean <- evals |>
+  rename(sex = gender) |> 
+  filter(no_participants >= 10) |> 
+  mutate(teacher_id = as.character(teacher_id),
+    course_id  = as.character(course_id),
+    academic_degree = as.factor(academic_degree),
+    seniority = as.numeric(seniority),
+    sex = as.factor(sex)) |>
+  
+  select(course_id, teacher_id, question_no, no_participants, resp_share,
+    SET_score_avg, percent_failed_cur, academic_degree, seniority, sex)
+
+write.csv(teacher_evals_clean, "data-clean/teacher_evals_clean.csv", row.names = FALSE)
+
+ 
+```
+
+**6. How many unique instructors and unique courses are present in the cleaned dataset?**
+
+```{r}
+#| label: number-of-unique-teachers-and-courses
+# unique instructors and unique courses present in the cleaned dataset
+teacher_evals_clean |>
+  summarise(n_teachers = n_distinct(teacher_id),
+    n_courses  = n_distinct(course_id))
+```
+
+**7. One teacher-course combination has some missing values, coded as `NA`. Which instructor has these missing values? Which course? What variable are the missing values in?**
+
+```{r}
+#| label: teacher-course-combination-is-na
+# teacher id of inscructor with missing values in dataset
+teacher_evals_clean |>
+  filter(if_any(everything(), is.na))
+```
+
+**8. What are the demographics of the instructors in this study? Investigate the variables `academic_degree`, `seniority`, and `sex` and summarize your findings in ~3 complete sentences.**
+
+```{r}
+#| label: instructor-demographics
+# demographics of the instructors in this study
+teacher_evals_clean |>
+  summarise(degree_counts = n_distinct(academic_degree),
+    seniority_min = min(seniority, na.rm = TRUE),
+    seniority_max = max(seniority, na.rm = TRUE))
+
+table(teacher_evals_clean$academic_degree)
+table(teacher_evals_clean$sex)
+summary(teacher_evals_clean$seniority)
+
+```
+
+>The gender distribution of instructors in this study is 3278 female instructors and 3539 male instructors. Out of the number of degrees that the instructors hold collectively, 4367 are Doctorate degrees, and 1852 are Masters degrees. Also, we can see that the mean number of calendar years that have passed since the instructors began teaching is 5.466 years.
+
+**9. Each course seems to have used a different subset of the nine evaluation questions. How many teacher-course combinations asked all nine questions?**
+
+```{r}
+#| label: teacher-course-comb-nine-questions
+# th number of teacher-course combinations that asked all nine questions
+teacher_evals_clean |>
+  group_by(teacher_id, course_id) |>
+  summarise(n_questions = n_distinct(question_no)) |>
+  filter(n_questions == 9) |>
+  nrow()
+
+
+```
+
+## Rate my Professor
+
+**10. Which instructors had the highest and lowest average rating for Question 1 (I learned a lot during the course.) across all their courses?**
+
+```{r}
+#| label: question1
+# instructors that had the highest and lowest average rating for Question 1 on the survey
+teacher_evals_clean |>
+  filter(question_no == 1) |>
+  group_by(teacher_id) |>
+  summarise(avg_q1 = mean(SET_score_avg, na.rm = TRUE)) |>
+  arrange(avg_q1)
+
+```
+
+**11. Which instructors with one year of experience had the highest and lowest average percentage of students failing in the current semester across all their courses?**
+
+```{r}
+#| label: one-year-experience
+# instructors with one year of experience that had the highest and lowest average percentage of students failing in the current semester across all their courses
+teacher_evals_clean |>
+  filter(seniority == 1) |>
+  group_by(teacher_id) |>
+  summarise(avg_fail = mean(percent_failed_cur, na.rm = TRUE)) |>
+  arrange(avg_fail)
+
+```
+
+**12. Which female instructors with either a doctorate or professional degree had the highest and lowest average percent of students responding to the evaluation across all their courses?**
+
+```{r}
+#| label: female-instructors-student-responses
+# female instructors with either a doctorate or professional degree that had the highest and lowest average percent of students responding to the evaluation across all their courses
+teacher_evals_clean |>
+  filter(sex == "female",
+    academic_degree %in% c("doctorate", "professional")) |>
+  group_by(teacher_id) |>
+  summarise(avg_resp = mean(resp_share, na.rm = TRUE)) |>
+  arrange(avg_resp)
+
+```
+
+
+Follow the instructions online to submit your lab correctly.  
