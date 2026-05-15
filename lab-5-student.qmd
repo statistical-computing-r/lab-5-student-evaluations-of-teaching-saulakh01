@@ -97,9 +97,11 @@ evals <- read.csv("teacher_evals.csv")
 summary(evals)
 dim(evals)
 ```
-The data is the scores that students give to statements on the questionnaire based on how much they agree with the statement. The statements are claims that indicate the housekeeping aspect of class structure, rather than direct material. It is more about how the material is taught over what material is taught. The feedback is also grouped with characteristics of the class instructors, the logistics of the course, and grades students typically received. 
+The data is the scores that students give to statements on the questionnaire based on how much they agree with the statement. The statements are claims that indicate the housekeeping aspect of class structure, rather than direct material. It is more about how the material is taught over what material is taught. The feedback is also grouped with characteristics of the class instructors, the logistics of the course, and grades students typically received. The grouping of the data can contextualize what kind of scores different instructors of different teaching styles and seniority levels receive.
 
 **4. What is the unit of observation (i.e. a single row in the dataset) identified by?**
+
+The single row demonstrates the 
 
 ```{r}
 #| label: row-identification
